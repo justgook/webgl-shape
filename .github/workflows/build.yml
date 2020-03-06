@@ -1,0 +1,82 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2.0.0
+      with:
+        persist-credentials: false
+
+    - name: Setup Elm
+      uses: justgook/setup-elm@v1
+
+    - name: Setup Node.js for use with actions
+      uses: actions/setup-node@v1.1.0
+      with:
+        node-version: 12.x
+
+    - name: Set yarn
+      id: yarn
+      run: |
+        echo "::set-output name=dir::$(yarn cache dir)"
+        echo "::add-path::$(yarn bin)"
+        echo "::add-path::$(yarn global bin)"
+
+    - name: Get Yarn cache
+      uses: actions/cache@v1.1.0
+      id: yarn-cache-exists
+      with:
+        path: ${{ steps.yarn.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
+    - name: Get node_modules
+      uses: actions/cache@v1.1.0
+      id: node_modules-cache-exists
+      with:
+        path: ./examples/node_modules
+        key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-node_modules-
+
+    - name: Install elm-test
+      run: yarn global add elm-test@0.19.1-revision2
+
+    - name: Test
+      env:
+        ELM_HOME: ${{ steps.elm-home.outputs.dir }}
+      run: elm-test
+
+    - name: Install Dependencies
+      #if: steps.yarn-cache-exists.outputs.cache-hit != 'true'
+      run: |
+        yarn
+        echo "::add-path::$(yarn bin)"
+      working-directory: examples
+
+#    - name: Optimize Javascript Jump
+#      uses: ./.github/actions/optimize-js
+#      with:
+#        file: ./examples/gh-pages/jump.js
+#        transform: ./examples/transform.js
+    - name: Building Examples
+      run: |
+        elm make src/Main.elm --output=./gh-pages/Main.html
+      working-directory: examples
+
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@3.2.1
+      with:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BASE_BRANCH: master
+        BRANCH: gh-pages
+        FOLDER: examples/gh-pages
