@@ -70,7 +70,7 @@ jobs:
 #        transform: ./examples/transform.js
     - name: Building Examples
       run: |
-        elm make src/Main.elm --output=./gh-pages/Main.html
+        elm make src/Main.elm --output=./gh-pages/index.html
       working-directory: examples
 
     - name: Deploy to GitHub Pages
