@@ -6080,32 +6080,17 @@ var $elm_explorations$webgl$WebGL$Internal$Alpha = function (a) {
 var $elm_explorations$webgl$WebGL$alpha = $elm_explorations$webgl$WebGL$Internal$Alpha;
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $author$project$WebGL$Shape2d$Group = function (a) {
-	return {$: 'Group', a: a};
+var $elm$html$Html$Attributes$height = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'height',
+		$elm$core$String$fromInt(n));
 };
 var $elm$core$Basics$identity = function (x) {
 	return x;
 };
 var $author$project$WebGL$Shape2d$Shape2d = function (a) {
 	return {$: 'Shape2d', a: a};
-};
-var $author$project$Main$group = function (shapes) {
-	return $author$project$WebGL$Shape2d$Shape2d(
-		{
-			a: 0,
-			form: $author$project$WebGL$Shape2d$Group(shapes),
-			o: 1,
-			sx: 1,
-			sy: 1,
-			x: 0,
-			y: 0
-		});
-};
-var $elm$html$Html$Attributes$height = function (n) {
-	return A2(
-		_VirtualDom_attribute,
-		'height',
-		$elm$core$String$fromInt(n));
 };
 var $author$project$Main$move = F3(
 	function (dx, dy, _v0) {
@@ -6641,33 +6626,29 @@ var $author$project$Main$main = A3(
 		{height: 100, width: 100},
 		_List_fromArray(
 			[
-				$author$project$Main$group(
-				_List_fromArray(
-					[
-						A3(
-						$author$project$Main$rectangle,
-						A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1, 0, 0),
-						30,
-						30),
-						A3(
-						$author$project$Main$move,
-						5,
-						5,
-						A3(
-							$author$project$Main$rectangle,
-							A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0),
-							30,
-							30)),
-						A3(
-						$author$project$Main$move,
-						10,
-						10,
-						A3(
-							$author$project$Main$rectangle,
-							A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 1),
-							30,
-							30))
-					]))
+				A3(
+				$author$project$Main$rectangle,
+				A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1, 0, 0),
+				30,
+				30),
+				A3(
+				$author$project$Main$move,
+				5,
+				5,
+				A3(
+					$author$project$Main$rectangle,
+					A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0),
+					30,
+					30)),
+				A3(
+				$author$project$Main$move,
+				10,
+				10,
+				A3(
+					$author$project$Main$rectangle,
+					A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 1),
+					30,
+					30))
 			])).a);
 _Platform_export({'Main':{'init':_VirtualDom_init($author$project$Main$main)(0)(0)}});}(this));
 
