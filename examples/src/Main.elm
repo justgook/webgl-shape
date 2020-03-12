@@ -10,11 +10,9 @@ import WebGL.Shape2d exposing (..)
 
 
 main =
-    [ [ rectangle (vec3 1 0 0) 30 30
-      , rectangle (vec3 0 1 0) 30 30 |> move 5 5
-      , rectangle (vec3 0 0 1) 30 30 |> move 10 10
-      ]
-        |> group
+    [ rectangle (vec3 1 0 0) 30 30
+    , rectangle (vec3 0 1 0) 30 30 |> move 5 5
+    , rectangle (vec3 0 0 1) 30 30 |> move 10 10
     ]
         |> WebGL.Shape2d.toEntities Dict.empty
             { width = 100, height = 100 }
@@ -87,11 +85,6 @@ mesh =
 move : Float -> Float -> Shape2d -> Shape2d
 move dx dy (Shape2d ({ x, y, a, sx, sy, o, form } as shape)) =
     Shape2d { shape | x = x + dx, y = y + dy }
-
-
-group : List Shape2d -> Shape2d
-group shapes =
-    Shape2d { x = 0, y = 0, a = 0, sx = 1, sy = 1, o = 1, form = Group shapes }
 
 
 setAlpha : Vec3 -> Float -> Vec4

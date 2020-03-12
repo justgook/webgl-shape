@@ -1,27 +1,26 @@
 # WebGL Shape
 
-2D wrapper for WebGL entities.
-Easy way to create 2d shapes (also core for [webgl-playground](https://package.elm-lang.org/packages/justgook/webgl-playground/latest/)): rectangles, circles, sprites and other shapes, group them and reuse textures.
+2D wrapper for WebGL entities (also core of [webgl-playground](https://package.elm-lang.org/packages/justgook/webgl-playground/latest/)).
+Easy way to create 2d shapes: rectangles, circles, sprites and other shapes, group them and reuse textures.
 
 ## Usage
 ```elm
+import WebGL.Shape2d exposing (..)
+
 main =
-    [ [ rectangle (vec3 1 0 0) 30 30
-      , rectangle (vec3 0 1 0) 30 30 |> move 5 5
-      , rectangle (vec3 0 0 1) 30 30 |> move 10 10
-      ]
-        |> group
+    [ rectangle (vec3 1 0 0) 30 30
+    , rectangle (vec3 0 1 0) 30 30 |> move 5 5
+    , rectangle (vec3 0 0 1) 30 30 |> move 10 10
     ]
         |> WebGL.Shape2d.toEntities Dict.empty
             { width = 100, height = 100 }
         |> Tuple.first
-        |> WebGL.toHtml [ width 100, height 100 ]
-
+        |> WebGL.toHtmlWith [ alpha True ] [ width 100, height 100 ]
 ```
 ## Rectangle
 
 ```elm
-
+import WebGL.Shape2d exposing (..)
 
 rectangle : Vec3 -> Float -> Float -> Shape2d
 rectangle color width height =
@@ -38,7 +37,7 @@ rectangle color width height =
 
 rectRender : Vec3 -> Render
 rectRender color uP uT opacity =
-    WebGL.entity
+    WebGL.entityWith []
         vertNone
         fragFill
         mesh
@@ -48,7 +47,6 @@ rectRender color uP uT opacity =
         }
 
 
-{-| -}
 vertNone : Shader { a | aP : Vec2 } { b | uP : Vec2, uT : Vec4 } {}
 vertNone =
     [glsl|
@@ -84,20 +82,13 @@ mesh =
         , { aP = vec2 1 1 }
         ]
 
-
 move : Float -> Float -> Shape2d -> Shape2d
 move dx dy (Shape2d ({ x, y, a, sx, sy, o, form } as shape)) =
     Shape2d { shape | x = x + dx, y = y + dy }
 
 
-group : List Shape2d -> Shape2d
-group shapes =
-    Shape2d { x = 0, y = 0, a = 0, sx = 1, sy = 1, o = 1, form = Group shapes }
-
-
 setAlpha : Vec3 -> Float -> Vec4
 setAlpha =
     Math.Vector3.toRecord >> (\a -> Math.Vector4.vec4 a.x a.y a.z)
-
 
 ```
