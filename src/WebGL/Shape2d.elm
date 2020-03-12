@@ -45,7 +45,7 @@ import WebGL.Texture exposing (Texture)
 -}
 toEntities : Dict String Texture -> { b | width : Float, height : Float } -> List Shape2d -> ( List Entity, Set.Set String )
 toEntities textures screen shapes =
-    List.foldl (renderShape screen textures Trans.identity 1) ( [], Set.empty ) shapes
+    List.foldr (renderShape screen textures Trans.identity 1) ( [], Set.empty ) shapes
 
 
 {-| Main building block
@@ -168,4 +168,4 @@ renderShape screen textures parent parentOpacity (Shape2d { x, y, a, sx, sy, o, 
 
         Group shapes ->
             shapes
-                |> List.foldl (renderShape screen textures (createTrans (x * 2) (y * 2) sx sy a) opacity) acc
+                |> List.foldr (renderShape screen textures (createTrans (x * 2) (y * 2) sx sy a) opacity) acc

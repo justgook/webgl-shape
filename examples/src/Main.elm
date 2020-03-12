@@ -5,7 +5,7 @@ import Html.Attributes exposing (height, width)
 import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3, vec3)
 import Math.Vector4 exposing (Vec4)
-import WebGL exposing (Mesh, Shader)
+import WebGL exposing (Mesh, Shader, alpha)
 import WebGL.Shape2d exposing (..)
 
 
@@ -19,7 +19,7 @@ main =
         |> WebGL.Shape2d.toEntities Dict.empty
             { width = 100, height = 100 }
         |> Tuple.first
-        |> WebGL.toHtml [ width 100, height 100 ]
+        |> WebGL.toHtmlWith [ alpha True ] [ width 100, height 100 ]
 
 
 rectangle : Vec3 -> Float -> Float -> Shape2d
@@ -37,7 +37,7 @@ rectangle color width height =
 
 rectRender : Vec3 -> Render
 rectRender color uP uT opacity =
-    WebGL.entity
+    WebGL.entityWith []
         vertNone
         fragFill
         mesh
