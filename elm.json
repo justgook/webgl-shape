@@ -3,7 +3,7 @@
     "name": "justgook/webgl-shape",
     "summary": "2D wrapper for WebGL entities",
     "license": "BSD-3-Clause",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "exposed-modules": [
         "WebGL.Shape2d"
     ],
