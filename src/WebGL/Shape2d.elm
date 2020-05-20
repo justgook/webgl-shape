@@ -1,7 +1,7 @@
 module WebGL.Shape2d exposing
     ( toEntities
     , Shape2d(..), Form(..)
-    , Render, Opacity, ScaleRotateSkew, Translate
+    , Render, Opacity, ScaleRotateSkew, Translate, Z
     )
 
 {-|
@@ -19,7 +19,7 @@ module WebGL.Shape2d exposing
 
 # Types
 
-@docs Render, Opacity, ScaleRotateSkew, Translate
+@docs Render, Opacity, ScaleRotateSkew, Translate, Z
 
 -}
 
@@ -67,6 +67,7 @@ type Shape2d
     = Shape2d
         { x : Float
         , y : Float
+        , z : Float
         , a : Float
         , sx : Float
         , sy : Float
@@ -90,7 +91,8 @@ type Form
             Shader.vertNone
             Shader.fragFill
             Shader.mesh
-            { color = setAlpha color opacity
+            { color = color
+            , opacity = opacity
             , uP = uP
             , uT = uT
             }
@@ -99,8 +101,15 @@ type Form
 type alias Render =
     Translate
     -> ScaleRotateSkew
+    -> Z
     -> Opacity
     -> WebGL.Entity
+
+
+{-| Css line `z-index` that is passed to the Render
+-}
+type alias Z =
+    Float
 
 
 {-| Vec2 representing part of transform matrix
@@ -135,29 +144,28 @@ type alias Opacity =
 
 
 renderShape : { a | width : Float, height : Float } -> Dict String Texture -> Transformation -> Float -> Shape2d -> ( List Entity, Set String ) -> ( List Entity, Set String )
-renderShape screen textures parent parentOpacity (Shape2d { x, y, a, sx, sy, o, form }) (( entities, missing ) as acc) =
-    let
-        createTrans tx ty sx_ sy_ a_ =
-            Trans.transform tx ty sx_ sy_ a_
-                |> Trans.apply parent
-
-        opacity =
-            o * parentOpacity
-    in
+renderShape screen textures parent parentOpacity (Shape2d { x, y, z, a, sx, sy, o, form }) (( entities, missing ) as acc) =
     case form of
         Form width height fn ->
             let
                 ( t1, t2 ) =
-                    createTrans (x * 2) (y * 2) (width * sx) (height * sy) a
+                    parent
+                        |> createTrans (x * 2) (y * 2) (width * sx) (height * sy) a
                         |> Trans.scale (1 / screen.width) (1 / screen.height)
                         |> Trans.toGL
             in
-            ( fn t2 t1 opacity :: entities, missing )
+            ( fn t2 t1 z (o * parentOpacity) :: entities, missing )
 
         Textured src fn ->
             case Dict.get src textures of
                 Just texture ->
-                    renderShape screen textures (createTrans (x * 2) (y * 2) sx sy a) opacity (fn texture) acc
+                    renderShape
+                        screen
+                        textures
+                        (createTrans (x * 2) (y * 2) sx sy a parent)
+                        (o * parentOpacity)
+                        (fn texture)
+                        acc
 
                 Nothing ->
                     if Set.member src missing then
@@ -167,5 +175,25 @@ renderShape screen textures parent parentOpacity (Shape2d { x, y, a, sx, sy, o, 
                         ( entities, Set.insert src missing )
 
         Group shapes ->
-            shapes
-                |> List.foldr (renderShape screen textures (createTrans (x * 2) (y * 2) sx sy a) opacity) acc
+            let
+                fn shape =
+                    shape
+                        |> setZ z
+                        |> renderShape
+                            screen
+                            textures
+                            (createTrans (x * 2) (y * 2) sx sy a parent)
+                            (o * parentOpacity)
+            in
+            List.foldr fn acc shapes
+
+
+setZ : Z -> Shape2d -> Shape2d
+setZ parentZ (Shape2d ({ z } as shape)) =
+    Shape2d { shape | z = parentZ + z }
+
+
+createTrans : Float -> Float -> Float -> Float -> Float -> Transformation -> Transformation
+createTrans tx ty sx_ sy_ a_ parent =
+    Trans.transform tx ty sx_ sy_ a_
+        |> Trans.apply parent
