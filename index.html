@@ -6524,13 +6524,12 @@ var $author$project$WebGL$Shape2d$Transformation$scale = F3(
 		return {a11: sx * b.a11, a12: sx * b.a12, a13: sx * b.a13, a21: sy * b.a21, a22: sy * b.a22, a23: sy * b.a23};
 	});
 var $author$project$WebGL$Shape2d$setZ = F2(
-	function (parentZ, _v0) {
+	function (z, _v0) {
 		var shape = _v0.a;
-		var z = shape.z;
 		return $author$project$WebGL$Shape2d$Shape2d(
 			_Utils_update(
 				shape,
-				{z: parentZ + z}));
+				{z: z + shape.z}));
 	});
 var $elm_explorations$linear_algebra$Math$Vector2$fromRecord = _MJS_v2fromRecord;
 var $elm_explorations$linear_algebra$Math$Vector4$fromRecord = _MJS_v4fromRecord;
