@@ -189,8 +189,8 @@ renderShape screen textures parent parentOpacity (Shape2d { x, y, z, a, sx, sy, 
 
 
 setZ : Z -> Shape2d -> Shape2d
-setZ parentZ (Shape2d ({ z } as shape)) =
-    Shape2d { shape | z = parentZ + z }
+setZ z (Shape2d shape) =
+    Shape2d { shape | z = z + shape.z }
 
 
 createTrans : Float -> Float -> Float -> Float -> Float -> Transformation -> Transformation
