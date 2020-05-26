@@ -167,7 +167,7 @@ renderShape screen textures parent (Shape2d { x, y, z, a, sx, sy, o, form }) (( 
                         screen
                         textures
                         (createTrans (x * 2) (y * 2) sx sy a parent)
-                        (setO o shape)
+                        (shape |> setOZ o z)
                         acc
 
                 Nothing ->
@@ -181,8 +181,7 @@ renderShape screen textures parent (Shape2d { x, y, z, a, sx, sy, o, form }) (( 
             let
                 fn shape =
                     shape
-                        |> setO o
-                        |> setZ z
+                        |> setOZ o z
                         |> renderShape
                             screen
                             textures
@@ -191,14 +190,9 @@ renderShape screen textures parent (Shape2d { x, y, z, a, sx, sy, o, form }) (( 
             List.foldr fn acc shapes
 
 
-setZ : Z -> Shape2d -> Shape2d
-setZ z (Shape2d shape) =
-    Shape2d { shape | z = z + shape.z }
-
-
-setO : Float -> Shape2d -> Shape2d
-setO o (Shape2d shape) =
-    Shape2d { shape | o = o * shape.o }
+setOZ : Opacity -> Z -> Shape2d -> Shape2d
+setOZ o z (Shape2d shape) =
+    Shape2d { shape | o = o * shape.o, z = z + shape.z }
 
 
 createTrans : Float -> Float -> Float -> Float -> Float -> Transformation -> Transformation
