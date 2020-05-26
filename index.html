@@ -6627,21 +6627,13 @@ var $author$project$WebGL$Shape2d$Transformation$scale = F3(
 	function (sx, sy, b) {
 		return {a11: sx * b.a11, a12: sx * b.a12, a13: sx * b.a13, a21: sy * b.a21, a22: sy * b.a22, a23: sy * b.a23};
 	});
-var $author$project$WebGL$Shape2d$setO = F2(
-	function (o, _v0) {
+var $author$project$WebGL$Shape2d$setOZ = F3(
+	function (o, z, _v0) {
 		var shape = _v0.a;
 		return $author$project$WebGL$Shape2d$Shape2d(
 			_Utils_update(
 				shape,
-				{o: o * shape.o}));
-	});
-var $author$project$WebGL$Shape2d$setZ = F2(
-	function (z, _v0) {
-		var shape = _v0.a;
-		return $author$project$WebGL$Shape2d$Shape2d(
-			_Utils_update(
-				shape,
-				{z: z + shape.z}));
+				{o: o * shape.o, z: z + shape.z}));
 	});
 var $elm_explorations$linear_algebra$Math$Vector2$fromRecord = _MJS_v2fromRecord;
 var $elm_explorations$linear_algebra$Math$Vector4$fromRecord = _MJS_v4fromRecord;
@@ -6701,7 +6693,7 @@ var $author$project$WebGL$Shape2d$renderShape = F5(
 						var $temp$screen = screen,
 							$temp$textures = textures,
 							$temp$parent = A6($author$project$WebGL$Shape2d$createTrans, x * 2, y * 2, sx, sy, a, parent),
-							$temp$_v0 = A2($author$project$WebGL$Shape2d$setO, o, shape),
+							$temp$_v0 = A3($author$project$WebGL$Shape2d$setOZ, o, z, shape),
 							$temp$acc = acc;
 						screen = $temp$screen;
 						textures = $temp$textures;
@@ -6722,10 +6714,7 @@ var $author$project$WebGL$Shape2d$renderShape = F5(
 							screen,
 							textures,
 							A6($author$project$WebGL$Shape2d$createTrans, x * 2, y * 2, sx, sy, a, parent),
-							A2(
-								$author$project$WebGL$Shape2d$setZ,
-								z,
-								A2($author$project$WebGL$Shape2d$setO, o, shape)));
+							A3($author$project$WebGL$Shape2d$setOZ, o, z, shape));
 					};
 					return A3($elm$core$List$foldr, fn, acc, shapes);
 			}
