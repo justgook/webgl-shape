@@ -6,20 +6,41 @@ import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3, vec3)
 import Math.Vector4 exposing (Vec4)
 import WebGL exposing (Mesh, Shader, alpha)
+import WebGL.Settings as WebGL
+import WebGL.Settings.Blend as Blend
 import WebGL.Settings.DepthTest as DepthTest
 import WebGL.Shape2d exposing (..)
 
 
 main =
-    [ rectangle (vec3 1 0 0) 30 30 |> zIndex 2
-    , rectangle (vec3 0 1 0) 30 30 |> move 5 5 |> zIndex 1
-    , rectangle (vec3 0 0 1) 30 30 |> move 10 10 |> zIndex -2
+    [ [ rectangle (vec3 1 0 0) 30 30 |> zIndex 3
+      , rectangle (vec3 0 1 0) 30 30 |> move 5 5 |> zIndex 2
+      , rectangle (vec3 0 0 1) 30 30 |> move 10 10 |> zIndex 1
+      ]
+        |> group
+        |> move 50 20
+    , [ rectangle (vec3 1 0 0) 30 30
+      , rectangle (vec3 0 1 0) 30 30 |> move 5 5 |> fade 0.5
+      , rectangle (vec3 0 0 1) 30 30 |> move 10 10 |> fade 0.5
+      ]
+        |> group
+        |> move -50 20
     ]
-        |> WebGL.Shape2d.toEntities Dict.empty { width = 100, height = 100 }
+        |> WebGL.Shape2d.toEntities Dict.empty { width = 200, height = 200 }
         |> Tuple.first
         |> WebGL.toHtmlWith
-            [ alpha True, WebGL.depth 0 ]
-            [ width 100, height 100 ]
+            [ WebGL.alpha True, WebGL.depth 1, WebGL.clearColor 1 1 1 1 ]
+            [ width 200, height 200 ]
+
+
+fade : Float -> Shape2d -> Shape2d
+fade o (Shape2d shape) =
+    Shape2d { shape | o = o }
+
+
+group : List Shape2d -> Shape2d
+group shapes =
+    Shape2d { x = 0, y = 0, z = 0, a = 0, sx = 1, sy = 1, o = 1, form = Group shapes }
 
 
 rectangle : Vec3 -> Float -> Float -> Shape2d
@@ -38,7 +59,7 @@ rectangle color width height =
 
 rectRender : Vec3 -> Render
 rectRender color uP uT z opacity =
-    WebGL.entityWith [ DepthTest.greaterOrEqual { write = True, near = 1, far = -1 } ]
+    WebGL.entityWith defaultEntitySettings
         vertNone
         fragFill
         mesh
@@ -47,6 +68,15 @@ rectRender color uP uT z opacity =
         , uT = uT
         , z = z
         }
+
+
+{-| -}
+defaultEntitySettings : List WebGL.Setting
+defaultEntitySettings =
+    [ Blend.add Blend.srcAlpha Blend.oneMinusSrcAlpha
+    , WebGL.colorMask True True True False
+    , DepthTest.lessOrEqual { write = True, near = 0, far = 1 }
+    ]
 
 
 {-| -}
@@ -60,7 +90,7 @@ vertNone =
         uniform vec2 uP;
         uniform float z;
         void main () {
-            gl_Position = vec4(aP * mat2(uT) + uP, z * 1.19209304e-7, 1.0);
+            gl_Position = vec4(aP * mat2(uT) + uP, z * -1.19209304e-7, 1.0);
         }
     |]
 
@@ -73,7 +103,6 @@ fragFill =
 
         void main () {
             gl_FragColor = color;
-
         }
     |]
 

@@ -45,7 +45,7 @@ import WebGL.Texture exposing (Texture)
 -}
 toEntities : Dict String Texture -> { b | width : Float, height : Float } -> List Shape2d -> ( List Entity, Set.Set String )
 toEntities textures screen shapes =
-    List.foldr (renderShape screen textures Trans.identity 1) ( [], Set.empty ) shapes
+    List.foldr (renderShape screen textures Trans.identity) ( [], Set.empty ) shapes
 
 
 {-| Main building block
@@ -143,8 +143,8 @@ type alias Opacity =
 --- INTERNAL STUFF
 
 
-renderShape : { a | width : Float, height : Float } -> Dict String Texture -> Transformation -> Float -> Shape2d -> ( List Entity, Set String ) -> ( List Entity, Set String )
-renderShape screen textures parent parentOpacity (Shape2d { x, y, z, a, sx, sy, o, form }) (( entities, missing ) as acc) =
+renderShape : { a | width : Float, height : Float } -> Dict String Texture -> Transformation -> Shape2d -> ( List Entity, Set String ) -> ( List Entity, Set String )
+renderShape screen textures parent (Shape2d { x, y, z, a, sx, sy, o, form }) (( entities, missing ) as acc) =
     case form of
         Form width height fn ->
             let
@@ -154,17 +154,20 @@ renderShape screen textures parent parentOpacity (Shape2d { x, y, z, a, sx, sy, 
                         |> Trans.scale (1 / screen.width) (1 / screen.height)
                         |> Trans.toGL
             in
-            ( fn t2 t1 z (o * parentOpacity) :: entities, missing )
+            ( fn t2 t1 z o :: entities, missing )
 
         Textured src fn ->
             case Dict.get src textures of
                 Just texture ->
+                    let
+                        shape =
+                            fn texture
+                    in
                     renderShape
                         screen
                         textures
                         (createTrans (x * 2) (y * 2) sx sy a parent)
-                        (o * parentOpacity)
-                        (fn texture)
+                        (setO o shape)
                         acc
 
                 Nothing ->
@@ -178,12 +181,12 @@ renderShape screen textures parent parentOpacity (Shape2d { x, y, z, a, sx, sy, 
             let
                 fn shape =
                     shape
+                        |> setO o
                         |> setZ z
                         |> renderShape
                             screen
                             textures
                             (createTrans (x * 2) (y * 2) sx sy a parent)
-                            (o * parentOpacity)
             in
             List.foldr fn acc shapes
 
@@ -191,6 +194,11 @@ renderShape screen textures parent parentOpacity (Shape2d { x, y, z, a, sx, sy, 
 setZ : Z -> Shape2d -> Shape2d
 setZ z (Shape2d shape) =
     Shape2d { shape | z = z + shape.z }
+
+
+setO : Float -> Shape2d -> Shape2d
+setO o (Shape2d shape) =
+    Shape2d { shape | o = o * shape.o }
 
 
 createTrans : Float -> Float -> Float -> Float -> Float -> Transformation -> Transformation
