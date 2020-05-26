@@ -6078,23 +6078,52 @@ var $elm_explorations$webgl$WebGL$Internal$Alpha = function (a) {
 	return {$: 'Alpha', a: a};
 };
 var $elm_explorations$webgl$WebGL$alpha = $elm_explorations$webgl$WebGL$Internal$Alpha;
+var $elm_explorations$webgl$WebGL$Internal$ClearColor = F4(
+	function (a, b, c, d) {
+		return {$: 'ClearColor', a: a, b: b, c: c, d: d};
+	});
+var $elm_explorations$webgl$WebGL$clearColor = $elm_explorations$webgl$WebGL$Internal$ClearColor;
 var $elm_explorations$webgl$WebGL$Internal$Depth = function (a) {
 	return {$: 'Depth', a: a};
 };
 var $elm_explorations$webgl$WebGL$depth = $elm_explorations$webgl$WebGL$Internal$Depth;
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
-var $elm$html$Html$Attributes$height = function (n) {
-	return A2(
-		_VirtualDom_attribute,
-		'height',
-		$elm$core$String$fromInt(n));
-};
 var $elm$core$Basics$identity = function (x) {
 	return x;
 };
 var $author$project$WebGL$Shape2d$Shape2d = function (a) {
 	return {$: 'Shape2d', a: a};
+};
+var $author$project$Main$fade = F2(
+	function (o, _v0) {
+		var shape = _v0.a;
+		return $author$project$WebGL$Shape2d$Shape2d(
+			_Utils_update(
+				shape,
+				{o: o}));
+	});
+var $author$project$WebGL$Shape2d$Group = function (a) {
+	return {$: 'Group', a: a};
+};
+var $author$project$Main$group = function (shapes) {
+	return $author$project$WebGL$Shape2d$Shape2d(
+		{
+			a: 0,
+			form: $author$project$WebGL$Shape2d$Group(shapes),
+			o: 1,
+			sx: 1,
+			sy: 1,
+			x: 0,
+			y: 0,
+			z: 0
+		});
+};
+var $elm$html$Html$Attributes$height = function (n) {
+	return A2(
+		_VirtualDom_attribute,
+		'height',
+		$elm$core$String$fromInt(n));
 };
 var $author$project$Main$move = F3(
 	function (dx, dy, _v0) {
@@ -6118,6 +6147,95 @@ var $author$project$WebGL$Shape2d$Form = F3(
 	function (a, b, c) {
 		return {$: 'Form', a: a, b: b, c: c};
 	});
+var $elm_explorations$webgl$WebGL$Internal$Blend = function (a) {
+	return function (b) {
+		return function (c) {
+			return function (d) {
+				return function (e) {
+					return function (f) {
+						return function (g) {
+							return function (h) {
+								return function (i) {
+									return function (j) {
+										return {$: 'Blend', a: a, b: b, c: c, d: d, e: e, f: f, g: g, h: h, i: i, j: j};
+									};
+								};
+							};
+						};
+					};
+				};
+			};
+		};
+	};
+};
+var $elm_explorations$webgl$WebGL$Settings$Blend$custom = function (_v0) {
+	var r = _v0.r;
+	var g = _v0.g;
+	var b = _v0.b;
+	var a = _v0.a;
+	var color = _v0.color;
+	var alpha = _v0.alpha;
+	var expand = F2(
+		function (_v1, _v2) {
+			var eq1 = _v1.a;
+			var f11 = _v1.b;
+			var f12 = _v1.c;
+			var eq2 = _v2.a;
+			var f21 = _v2.b;
+			var f22 = _v2.c;
+			return $elm_explorations$webgl$WebGL$Internal$Blend(eq1)(f11)(f12)(eq2)(f21)(f22)(r)(g)(b)(a);
+		});
+	return A2(expand, color, alpha);
+};
+var $elm_explorations$webgl$WebGL$Settings$Blend$Blender = F3(
+	function (a, b, c) {
+		return {$: 'Blender', a: a, b: b, c: c};
+	});
+var $elm_explorations$webgl$WebGL$Settings$Blend$customAdd = F2(
+	function (_v0, _v1) {
+		var factor1 = _v0.a;
+		var factor2 = _v1.a;
+		return A3($elm_explorations$webgl$WebGL$Settings$Blend$Blender, 32774, factor1, factor2);
+	});
+var $elm_explorations$webgl$WebGL$Settings$Blend$add = F2(
+	function (factor1, factor2) {
+		return $elm_explorations$webgl$WebGL$Settings$Blend$custom(
+			{
+				a: 0,
+				alpha: A2($elm_explorations$webgl$WebGL$Settings$Blend$customAdd, factor1, factor2),
+				b: 0,
+				color: A2($elm_explorations$webgl$WebGL$Settings$Blend$customAdd, factor1, factor2),
+				g: 0,
+				r: 0
+			});
+	});
+var $elm_explorations$webgl$WebGL$Internal$ColorMask = F4(
+	function (a, b, c, d) {
+		return {$: 'ColorMask', a: a, b: b, c: c, d: d};
+	});
+var $elm_explorations$webgl$WebGL$Settings$colorMask = $elm_explorations$webgl$WebGL$Internal$ColorMask;
+var $elm_explorations$webgl$WebGL$Internal$DepthTest = F4(
+	function (a, b, c, d) {
+		return {$: 'DepthTest', a: a, b: b, c: c, d: d};
+	});
+var $elm_explorations$webgl$WebGL$Settings$DepthTest$lessOrEqual = function (_v0) {
+	var write = _v0.write;
+	var near = _v0.near;
+	var far = _v0.far;
+	return A4($elm_explorations$webgl$WebGL$Internal$DepthTest, 515, write, near, far);
+};
+var $elm_explorations$webgl$WebGL$Settings$Blend$Factor = function (a) {
+	return {$: 'Factor', a: a};
+};
+var $elm_explorations$webgl$WebGL$Settings$Blend$oneMinusSrcAlpha = $elm_explorations$webgl$WebGL$Settings$Blend$Factor(771);
+var $elm_explorations$webgl$WebGL$Settings$Blend$srcAlpha = $elm_explorations$webgl$WebGL$Settings$Blend$Factor(770);
+var $author$project$Main$defaultEntitySettings = _List_fromArray(
+	[
+		A2($elm_explorations$webgl$WebGL$Settings$Blend$add, $elm_explorations$webgl$WebGL$Settings$Blend$srcAlpha, $elm_explorations$webgl$WebGL$Settings$Blend$oneMinusSrcAlpha),
+		A4($elm_explorations$webgl$WebGL$Settings$colorMask, true, true, true, false),
+		$elm_explorations$webgl$WebGL$Settings$DepthTest$lessOrEqual(
+		{far: 1, near: 0, write: true})
+	]);
 var $elm_explorations$webgl$WebGL$Internal$disableSetting = F2(
 	function (cache, setting) {
 		switch (setting.$) {
@@ -6183,19 +6301,9 @@ var $elm_explorations$webgl$WebGL$Internal$enableSetting = F2(
 	});
 var $elm_explorations$webgl$WebGL$entityWith = _WebGL_entity;
 var $author$project$Main$fragFill = {
-	src: '\n        precision mediump float;\n        uniform vec4 color;\n\n        void main () {\n            gl_FragColor = color;\n\n        }\n    ',
+	src: '\n        precision mediump float;\n        uniform vec4 color;\n\n        void main () {\n            gl_FragColor = color;\n        }\n    ',
 	attributes: {},
 	uniforms: {color: 'color'}
-};
-var $elm_explorations$webgl$WebGL$Internal$DepthTest = F4(
-	function (a, b, c, d) {
-		return {$: 'DepthTest', a: a, b: b, c: c, d: d};
-	});
-var $elm_explorations$webgl$WebGL$Settings$DepthTest$greaterOrEqual = function (_v0) {
-	var write = _v0.write;
-	var near = _v0.near;
-	var far = _v0.far;
-	return A4($elm_explorations$webgl$WebGL$Internal$DepthTest, 518, write, near, far);
 };
 var $elm_explorations$webgl$WebGL$Mesh1 = F2(
 	function (a, b) {
@@ -6234,7 +6342,7 @@ var $author$project$Main$setAlpha = A2(
 		return A3($elm_explorations$linear_algebra$Math$Vector4$vec4, a.x, a.y, a.z);
 	});
 var $author$project$Main$vertNone = {
-	src: '\n        precision mediump float;\n        attribute vec2 aP;\n        uniform vec4 uT;\n        uniform vec2 uP;\n        uniform float z;\n        void main () {\n            gl_Position = vec4(aP * mat2(uT) + uP, z * 1.19209304e-7, 1.0);\n        }\n    ',
+	src: '\n        precision mediump float;\n        attribute vec2 aP;\n        uniform vec4 uT;\n        uniform vec2 uP;\n        uniform float z;\n        void main () {\n            gl_Position = vec4(aP * mat2(uT) + uP, z * -1.19209304e-7, 1.0);\n        }\n    ',
 	attributes: {aP: 'aP'},
 	uniforms: {uP: 'uP', uT: 'uT', z: 'z'}
 };
@@ -6242,11 +6350,7 @@ var $author$project$Main$rectRender = F5(
 	function (color, uP, uT, z, opacity) {
 		return A5(
 			$elm_explorations$webgl$WebGL$entityWith,
-			_List_fromArray(
-				[
-					$elm_explorations$webgl$WebGL$Settings$DepthTest$greaterOrEqual(
-					{far: -1, near: 1, write: true})
-				]),
+			$author$project$Main$defaultEntitySettings,
 			$author$project$Main$vertNone,
 			$author$project$Main$fragFill,
 			$author$project$Main$mesh,
@@ -6523,6 +6627,14 @@ var $author$project$WebGL$Shape2d$Transformation$scale = F3(
 	function (sx, sy, b) {
 		return {a11: sx * b.a11, a12: sx * b.a12, a13: sx * b.a13, a21: sy * b.a21, a22: sy * b.a22, a23: sy * b.a23};
 	});
+var $author$project$WebGL$Shape2d$setO = F2(
+	function (o, _v0) {
+		var shape = _v0.a;
+		return $author$project$WebGL$Shape2d$Shape2d(
+			_Utils_update(
+				shape,
+				{o: o * shape.o}));
+	});
 var $author$project$WebGL$Shape2d$setZ = F2(
 	function (z, _v0) {
 		var shape = _v0.a;
@@ -6546,8 +6658,8 @@ var $author$project$WebGL$Shape2d$Transformation$toGL = function (_v0) {
 		$elm_explorations$linear_algebra$Math$Vector2$fromRecord(
 			{x: a13, y: a23}));
 };
-var $author$project$WebGL$Shape2d$renderShape = F6(
-	function (screen, textures, parent, parentOpacity, _v0, acc) {
+var $author$project$WebGL$Shape2d$renderShape = F5(
+	function (screen, textures, parent, _v0, acc) {
 		renderShape:
 		while (true) {
 			var x = _v0.a.x;
@@ -6576,7 +6688,7 @@ var $author$project$WebGL$Shape2d$renderShape = F6(
 					return _Utils_Tuple2(
 						A2(
 							$elm$core$List$cons,
-							A4(fn, t2, t1, z, o * parentOpacity),
+							A4(fn, t2, t1, z, o),
 							entities),
 						missing);
 				case 'Textured':
@@ -6585,16 +6697,15 @@ var $author$project$WebGL$Shape2d$renderShape = F6(
 					var _v3 = A2($elm$core$Dict$get, src, textures);
 					if (_v3.$ === 'Just') {
 						var texture = _v3.a;
+						var shape = fn(texture);
 						var $temp$screen = screen,
 							$temp$textures = textures,
 							$temp$parent = A6($author$project$WebGL$Shape2d$createTrans, x * 2, y * 2, sx, sy, a, parent),
-							$temp$parentOpacity = o * parentOpacity,
-							$temp$_v0 = fn(texture),
+							$temp$_v0 = A2($author$project$WebGL$Shape2d$setO, o, shape),
 							$temp$acc = acc;
 						screen = $temp$screen;
 						textures = $temp$textures;
 						parent = $temp$parent;
-						parentOpacity = $temp$parentOpacity;
 						_v0 = $temp$_v0;
 						acc = $temp$acc;
 						continue renderShape;
@@ -6606,13 +6717,15 @@ var $author$project$WebGL$Shape2d$renderShape = F6(
 				default:
 					var shapes = form.a;
 					var fn = function (shape) {
-						return A5(
+						return A4(
 							$author$project$WebGL$Shape2d$renderShape,
 							screen,
 							textures,
 							A6($author$project$WebGL$Shape2d$createTrans, x * 2, y * 2, sx, sy, a, parent),
-							o * parentOpacity,
-							A2($author$project$WebGL$Shape2d$setZ, z, shape));
+							A2(
+								$author$project$WebGL$Shape2d$setZ,
+								z,
+								A2($author$project$WebGL$Shape2d$setO, o, shape)));
 					};
 					return A3($elm$core$List$foldr, fn, acc, shapes);
 			}
@@ -6622,7 +6735,7 @@ var $author$project$WebGL$Shape2d$toEntities = F3(
 	function (textures, screen, shapes) {
 		return A3(
 			$elm$core$List$foldr,
-			A4($author$project$WebGL$Shape2d$renderShape, screen, textures, $author$project$WebGL$Shape2d$Transformation$identity, 1),
+			A3($author$project$WebGL$Shape2d$renderShape, screen, textures, $author$project$WebGL$Shape2d$Transformation$identity),
 			_Utils_Tuple2(_List_Nil, $elm$core$Set$empty),
 			shapes);
 	});
@@ -6650,51 +6763,97 @@ var $author$project$Main$main = A3(
 	_List_fromArray(
 		[
 			$elm_explorations$webgl$WebGL$alpha(true),
-			$elm_explorations$webgl$WebGL$depth(0)
+			$elm_explorations$webgl$WebGL$depth(1),
+			A4($elm_explorations$webgl$WebGL$clearColor, 1, 1, 1, 1)
 		]),
 	_List_fromArray(
 		[
-			$elm$html$Html$Attributes$width(100),
-			$elm$html$Html$Attributes$height(100)
+			$elm$html$Html$Attributes$width(200),
+			$elm$html$Html$Attributes$height(200)
 		]),
 	A3(
 		$author$project$WebGL$Shape2d$toEntities,
 		$elm$core$Dict$empty,
-		{height: 100, width: 100},
+		{height: 200, width: 200},
 		_List_fromArray(
 			[
-				A2(
-				$author$project$Main$zIndex,
-				2,
 				A3(
-					$author$project$Main$rectangle,
-					A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1, 0, 0),
-					30,
-					30)),
-				A2(
-				$author$project$Main$zIndex,
-				1,
+				$author$project$Main$move,
+				50,
+				20,
+				$author$project$Main$group(
+					_List_fromArray(
+						[
+							A2(
+							$author$project$Main$zIndex,
+							3,
+							A3(
+								$author$project$Main$rectangle,
+								A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1, 0, 0),
+								30,
+								30)),
+							A2(
+							$author$project$Main$zIndex,
+							2,
+							A3(
+								$author$project$Main$move,
+								5,
+								5,
+								A3(
+									$author$project$Main$rectangle,
+									A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0),
+									30,
+									30))),
+							A2(
+							$author$project$Main$zIndex,
+							1,
+							A3(
+								$author$project$Main$move,
+								10,
+								10,
+								A3(
+									$author$project$Main$rectangle,
+									A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 1),
+									30,
+									30)))
+						]))),
 				A3(
-					$author$project$Main$move,
-					5,
-					5,
-					A3(
-						$author$project$Main$rectangle,
-						A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0),
-						30,
-						30))),
-				A2(
-				$author$project$Main$zIndex,
-				-2,
-				A3(
-					$author$project$Main$move,
-					10,
-					10,
-					A3(
-						$author$project$Main$rectangle,
-						A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 1),
-						30,
-						30)))
+				$author$project$Main$move,
+				-50,
+				20,
+				$author$project$Main$group(
+					_List_fromArray(
+						[
+							A3(
+							$author$project$Main$rectangle,
+							A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 1, 0, 0),
+							30,
+							30),
+							A2(
+							$author$project$Main$fade,
+							0.5,
+							A3(
+								$author$project$Main$move,
+								5,
+								5,
+								A3(
+									$author$project$Main$rectangle,
+									A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 1, 0),
+									30,
+									30))),
+							A2(
+							$author$project$Main$fade,
+							0.5,
+							A3(
+								$author$project$Main$move,
+								10,
+								10,
+								A3(
+									$author$project$Main$rectangle,
+									A3($elm_explorations$linear_algebra$Math$Vector3$vec3, 0, 0, 1),
+									30,
+									30)))
+						])))
 			])).a);
 _Platform_export({'Main':{'init':_VirtualDom_init($author$project$Main$main)(0)(0)}});}(this));
 
