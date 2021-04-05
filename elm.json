@@ -1,19 +1,27 @@
 {
-    "type": "package",
-    "name": "justgook/webgl-shape",
-    "summary": "2D wrapper for WebGL entities",
-    "license": "BSD-3-Clause",
-    "version": "2.0.2",
-    "exposed-modules": [
-        "WebGL.Shape2d"
-    ],
-    "elm-version": "0.19.0 <= v < 0.20.0",
-    "dependencies": {
-        "elm/core": "1.0.2 <= v < 2.0.0",
-        "elm-explorations/linear-algebra": "1.0.3 <= v < 2.0.0",
-        "elm-explorations/webgl": "1.1.1 <= v < 2.0.0"
-    },
-    "test-dependencies": {
-        "elm-explorations/test": "1.2.2 <= v < 2.0.0"
-    }
+  "type": "package",
+  "name": "justgook/webgl-game2d",
+  "summary": "2D wrapper for WebGL entities",
+  "license": "BSD-3-Clause",
+  "version": "1.0.0",
+  "exposed-modules": [
+    "WebGL.Game2d",
+    "WebGL.Game2d.Render",
+    "WebGL.Game2d.Shader",
+    "WebGL.Game2d.Shape",
+    "WebGL.Game2d.SolidShape",
+    "WebGL.Game2d.TexturedShape",
+    "WebGL.Game2d.TextureManager"
+  ],
+  "elm-version": "0.19.0 <= v < 0.20.0",
+  "dependencies": {
+    "elm/core": "1.0.2 <= v < 2.0.0",
+    "elm/json": "1.1.3 <= v < 2.0.0",
+    "elm/time": "1.0.0 <= v < 2.0.0",
+    "elm-explorations/linear-algebra": "1.0.3 <= v < 2.0.0",
+    "elm-explorations/webgl": "1.1.1 <= v < 2.0.0"
+  },
+  "test-dependencies": {
+    "elm-explorations/test": "1.2.2 <= v < 2.0.0"
+  }
 }
