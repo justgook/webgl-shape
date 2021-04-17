@@ -11,9 +11,9 @@ module WebGL.Game2d.SolidShape exposing (shape, group, toEntities, SolidShape, F
 
 import WebGL exposing (Entity)
 import WebGL.Game2d.Internal exposing (applyOZ, createTrans)
+import WebGL.Game2d.Internal.Transformation as Trans exposing (Transformation)
 import WebGL.Game2d.Render exposing (Height, Render, Width)
 import WebGL.Game2d.Shape as Shape exposing (GroupData, ShapeData)
-import WebGL.Game2d.Transformation as Trans exposing (Transformation)
 
 
 {-| -}

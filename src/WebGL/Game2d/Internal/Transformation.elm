@@ -1,4 +1,4 @@
-module WebGL.Game2d.Transformation exposing (Transformation, apply, identity, makeRotate, makeScale, makeTranslate, scale, toGL, create)
+module WebGL.Game2d.Internal.Transformation exposing (Transformation, apply, identity, makeRotate, makeScale, makeTranslate, scale, toGL, create)
 
 {-| 2d Transformation 2x3
 

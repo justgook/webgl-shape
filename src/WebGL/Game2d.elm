@@ -2,6 +2,7 @@ module WebGL.Game2d exposing
     ( view, update, Model
     , move, setZ
     , rotate, fade, scale
+    , TextureManager, textureManager
     , Computer
     , Time, tick
     , Mouse, initMouse, mouseSubscription
@@ -26,6 +27,11 @@ module WebGL.Game2d exposing
 # Customize Shapes
 
 @docs rotate, fade, scale
+
+
+# Texture Manager
+
+@docs TextureManager, textureManager
 
 
 # Computer
@@ -67,30 +73,76 @@ import Html.Lazy
 import Json.Decode as D
 import Math.Vector3
 import Set exposing (Set)
-import Task exposing (Task)
+import Task
 import Time
 import WebGL exposing (Entity)
 import WebGL.Game2d.Render exposing (Height, Width)
 import WebGL.Game2d.Shape exposing (Shape)
-import WebGL.Game2d.TextureManager as TextureManager exposing (TextureManager)
-import WebGL.Game2d.TexturedShape as ShapeTextured
-import WebGL.Texture exposing (Texture)
+import WebGL.Game2d.TexturedShape as AutoTextures exposing (TextureLoader(..), TexturedShape)
+import WebGL.Texture as Texture exposing (Texture)
 
 
 {-| -}
-type alias Model a b =
+type alias TextureManager =
+    TextureLoader String
+
+
+textureManager_ : Dict String Texture -> Set String -> Set String -> TextureLoader String
+textureManager_ dict missing loading =
+    TextureLoader
+        { get = \k -> Dict.get k dict
+        , missing = \k -> textureManager_ dict (Set.insert k missing) loading
+        , extract =
+            \() ->
+                let
+                    ( tt, tasks ) =
+                        Set.foldl
+                            (\src (( l, req ) as acc) ->
+                                if Set.member src loading then
+                                    acc
+
+                                else
+                                    ( Set.insert src l, src :: req )
+                            )
+                            ( loading, [] )
+                            missing
+                in
+                ( textureManager_ dict Set.empty tt, tasks )
+        , insert =
+            \key tt ->
+                textureManager_ (Dict.insert key tt dict) missing loading
+        }
+
+
+{-| -}
+textureManager : TextureManager
+textureManager =
+    textureManager_ Dict.empty Set.empty Set.empty
+
+
+{-| -}
+type alias Model screen a =
     { a
-        | screen : { b | width : Width, height : Height }
+        | screen : { screen | width : Width, height : Height }
         , textures : TextureManager
         , entities : List Entity
     }
 
 
+type alias Message screen a =
+    Model screen a -> Model screen a
+
+
 {-| Create WebGL canvas
 -}
-view : Int -> Int -> List Entity -> Html msg
-view width height entities =
-    view_ [ H.width width, H.height height ] entities
+view : Model screen a -> Html msg
+view model =
+    view_
+        [ H.attribute "style" "position:absolute;top:0;right:0;bottom:0;left:0;"
+        , H.height (round model.screen.height)
+        , H.width (round model.screen.width)
+        ]
+        model.entities
 
 
 view_ : List (Html.Attribute msg) -> List Entity -> Html msg
@@ -100,29 +152,67 @@ view_ attrs entities =
 
 webGLOption : List WebGL.Option
 webGLOption =
-    [ WebGL.alpha False
-    , WebGL.depth 1
-    , WebGL.clearColor 1 1 1 1
-    ]
+    [ WebGL.alpha False, WebGL.depth 1, WebGL.clearColor 1 1 1 1 ]
+
+
+
+{- UPDATE -}
+
+
+textureOption : Texture.Options
+textureOption =
+    { magnify = Texture.linear
+    , minify = Texture.linear
+    , horizontalWrap = Texture.clampToEdge
+    , verticalWrap = Texture.clampToEdge
+    , flipY = True
+    }
+
+
+load : String -> Task.Task Texture.Error ( String, Texture )
+load src =
+    Texture.loadWith textureOption src
+        |> Task.map (\t -> ( src, t ))
 
 
 {-| -}
-update :
-    Model a b
-    -> List (ShapeTextured.TexturedShape String)
-    -> ( Model a b, Task WebGL.Texture.Error (List Texture) )
-update ({ screen, textures } as model) shapes =
+update : (Model screen a -> List (TexturedShape String)) -> Message screen a -> Model screen a -> ( Model screen a, Cmd (Message screen a) )
+update viewFn msg oldModel =
     let
-        getTextures src =
-            Dict.get src textures.done
+        updatedModel =
+            msg oldModel
 
-        ( ent, mm ) =
-            ShapeTextured.toEntities screen.width screen.height getTextures Set.insert textures.missing shapes
+        ( entities, TextureLoader textures ) =
+            viewFn updatedModel
+                |> AutoTextures.toEntities updatedModel.screen.width updatedModel.screen.height updatedModel.textures
 
-        ( tManager, tasks ) =
-            TextureManager.request { textures | missing = mm }
+        ( loader, missing ) =
+            textures.extract ()
+
+        cmd2 =
+            case missing of
+                [] ->
+                    Cmd.none
+
+                _ ->
+                    List.map load missing
+                        |> Task.sequence
+                        |> Task.attempt
+                            (\r m ->
+                                case r of
+                                    Ok value ->
+                                        { m | textures = List.foldl (\( k, v ) (TextureLoader acc) -> acc.insert k v) m.textures value }
+
+                                    Err err ->
+                                        m
+                            )
     in
-    ( { model | entities = ent, textures = tManager }, tasks )
+    ( { updatedModel
+        | entities = entities
+        , textures = loader
+      }
+    , cmd2
+    )
 
 
 {-| Move a shape by some Float of pixels:

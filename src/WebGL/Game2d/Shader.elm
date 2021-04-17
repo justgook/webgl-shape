@@ -1,6 +1,6 @@
 module WebGL.Game2d.Shader exposing
-    ( vertNone, vertRect, vertImage, vertTriangle, vertTile
-    , fragFill, fragCircle, fragNgon, fragImage, fragImageColor
+    ( vertNone, vertRect, vertImage, vertTriangle, vertTile, vertSprite
+    , fragFill, fragCircle, fragNgon, fragImage, fragImageColor, fragTilemap
     , mesh, meshTriangle
     )
 
@@ -9,12 +9,12 @@ module WebGL.Game2d.Shader exposing
 
 # Vertex Shaders
 
-@docs vertNone, vertRect, vertImage, vertTriangle, vertTile
+@docs vertNone, vertRect, vertImage, vertTriangle, vertTile, vertSprite
 
 
 # Fragment Shaders
 
-@docs fragFill, fragCircle, fragNgon, fragImage, fragImageColor
+@docs fragFill, fragCircle, fragNgon, fragImage, fragImageColor, fragTilemap
 
 
 # Mesh
@@ -148,6 +148,26 @@ vertTile =
         |]
 
 
+{-| -}
+vertSprite : Shader { a | aP : Vec2 } { b | uP : Vec2, uT : Vec4, uUV : Vec4, z : Float } { uv : Vec2 }
+vertSprite =
+    [glsl|
+            precision highp float;
+            attribute vec2 aP;
+            uniform vec4 uT;
+            uniform vec2 uP;
+            varying vec2 uv;
+            uniform vec4 uUV;
+            uniform float z;
+            vec2 edgeFix = vec2(0.0000001, -0.0000001);
+            void main () {
+                vec2 aP_ = aP * .5 + 0.5;
+                uv = uUV.xy + (aP_ * uUV.zw) + edgeFix;
+                gl_Position = vec4(aP * mat2(uT) + uP, z  * -1.19209304e-7, 1.0);
+            }
+        |]
+
+
 
 --Fragment Shaders
 
@@ -237,6 +257,53 @@ fragNgon =
     |]
 
 
+{-| -}
+fragTilemap : Shader a { b | uA : Float, uAtlas : Texture, uAtlasSize : Vec2, uLut : Texture, uLutSize : Vec2, uTileSize : Vec2 } { uv : Vec2 }
+fragTilemap =
+    --http://media.tojicode.com/webgl-samples/tilemap.html
+    [glsl|
+precision highp float;
+varying vec2 uv;
+uniform sampler2D uAtlas;
+uniform sampler2D uLut;
+uniform vec2 uAtlasSize;
+uniform vec2 uLutSize;
+uniform vec2 uTileSize;
+uniform float uA;
+float color2float(vec4 color) {
+//    return color.a * 255.0 + color.b * 256.0 * 255.0 + color.g * 256.0 * 256.0 * 255.0 + color.r * 256.0 * 256.0 * 256.0 * 255.0;
+    return color.a * 255.0 + color.b * 65280.0 + color.g * 16711680.0 + color.r * 4278190080.0;
+    }
+/**
+ * Returns accurate MOD when arguments are approximate integers.
+ */
+float modI(float a,float b) {
+    float m=a-floor((a+0.5)/b)*b;
+    return floor(m+0.5);
+}
+void main () {
+    vec2 point = floor(uv * uLutSize);
+    vec2 offset = fract(uv * uLutSize);
+    //(2i + 1)/(2N) Pixel center
+    vec2 coordinate = (point + 0.5) / uLutSize;
+    float index = color2float(texture2D(uLut, coordinate));
+    if (index <= 0.0) discard;
+    vec2 grid = uAtlasSize / uTileSize;
+    // tile indexes in uAtlas starts from zero, but in lut zero is used for
+    // "none" placeholder
+    vec2 tile = vec2(modI((index - 1.), grid.x), int(index - 1.) / int(grid.x));
+    // inverting reading botom to top
+    tile.y = grid.y - tile.y - 1.;
+    vec2 fragmentOffsetPx = floor(offset * uTileSize);
+    //(2i + 1)/(2N) Pixel center
+    vec2 pixel = (floor(tile * uTileSize + fragmentOffsetPx) + 0.5) / uAtlasSize;
+    gl_FragColor = texture2D(uAtlas, pixel);
+    gl_FragColor.a *= float(index != 0.0);
+   if(gl_FragColor.a <= 0.025) discard;
+}
+    |]
+
+
 
 ---MESHES
 
@@ -260,92 +327,3 @@ mesh =
         , { aP = vec2 1 -1 }
         , { aP = vec2 1 1 }
         ]
-
-
-
----FUTURE DEVELOPMENT ---
---
---fragImageSaturation =
---    --https://github.com/AnalyticalGraphicsInc/cesium/blob/master/Source/Shaders/Builtin/Functions/saturation.glsl
---    -- * @example
---    -- * vec3 greyScale = saturation(color, 0.0);
---    -- * vec3 doubleSaturation = saturation(color, 2.0);
---    -- */
---    [glsl|
---        precision highp float;
---        varying vec2 uv;
---        uniform sampler2D uImg;
---        uniform float adjustment;
---        vec3 saturation(vec3 rgb, float adj) {
---            // Algorithm from Chapter 16 of OpenGL Shading Language
---            const vec3 W = vec3(0.2125, 0.7154, 0.0721);
---            vec3 intensity = vec3(dot(rgb, W));
---            return mix(intensity, rgb, adj);
---        }
---        void main () {
---            gl_FragColor = texture2D(uImg, uv);
---            gl_FragColor.xyz=saturation(gl_FragColor.xyz, adjustment);
---            if(gl_FragColor.a <= 0.025) discard;
---        }
---    |]
---
---
---rotSprite =
---    --https://discover.therookies.co/2019/08/13/unity-masterclass-how-to-set-up-your-project-for-pixel-perfect-retro-8-bit-games/
---    --https://en.wikipedia.org/wiki/Pixel-art_scaling_algorithms#RotSprite
---    --https://github.com/libretro/glsl-shaders/blob/master/scalenx/shaders/scale2x.glsl
---    [glsl|
---        precision highp float;
---        varying vec2 uv;
---        uniform vec2 uImgSize;
---        uniform sampler2D uImg;
---
---        void main () {
---            vec2 pixel = (floor(uv * uImgSize) + 0.5) / uImgSize;
---            gl_FragColor = texture2D(uImg, pixel);
---            if(gl_FragColor.a <= 0.025) discard;
---
---        }
---    |]
---
---{-| FILTERS !!! <https://dev.to/lesnitsky/webgl-month-day-9-uImg-filters-5g8e>
----}
---sepia =
---    [glsl|
---  vec4 sepia(vec4 color) {
---      vec3 sepiaColor = vec3(112, 66, 20) / 255.0;
---     return vec4(
---         mix(color.rgb, sepiaColor, 0.4),
---         color.a
---     );
---  }
---  |]
---
---
---hue =
---    --https://github.com/AnalyticalGraphicsInc/cesium/blob/master/Source/Shaders/Builtin/Functions/hue.glsl
---    [glsl|
---vec3 czm_hue(vec3 rgb, float adjustment)
---{
---    const mat3 toYIQ = mat3(0.299,     0.587,     0.114,
---                            0.595716, -0.274453, -0.321263,
---                            0.211456, -0.522591,  0.311135);
---    const mat3 toRGB = mat3(1.0,  0.9563,  0.6210,
---                            1.0, -0.2721, -0.6474,
---                            1.0, -1.107,   1.7046);
---
---    vec3 yiq = toYIQ * rgb;
---    float hue = atan(yiq.z, yiq.y) + adjustment;
---    float chroma = sqrt(yiq.z * yiq.z + yiq.y * yiq.y);
---
---    vec3 color = vec3(yiq.x, chroma * cos(hue), chroma * sin(hue));
---    return toRGB * color;
---}
-
-
-
---    |]
---
---
---snow =
---    "https://www.patreon.com/posts/tutorial-23614114"

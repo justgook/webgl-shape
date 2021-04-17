@@ -1,7 +1,7 @@
 {
   "name": "webgl-game2d",
   "version": "1.0.0",
-  "repository": "git@github.com:justgook/elm-age.git",
+  "repository": "git@github.com:justgook/elm-game2d.git",
   "author": "Romāns Potašovs <justgook@gmail.com>",
   "license": "BSD-3-Clause",
   "dependencies": {
