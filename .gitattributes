@@ -1,3 +1,4 @@
 bundle.js linguist-generated=true
 examples/* linguist-detectable=false
+.github/* linguist-detectable=false
 *.html linguist-vendored
