@@ -21,10 +21,10 @@ jobs:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: "true"
 
 
-    - name: Setup Node.js for use with actions
-      uses: actions/setup-node@v1.1.0
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v2.1.5
       with:
-        node-version: 12.x
+        node-version: '14'
 
     - name: Set yarn
       id: yarn
