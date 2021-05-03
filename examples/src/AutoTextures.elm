@@ -2,11 +2,9 @@ module AutoTextures exposing (main)
 
 import AutoTextures.Asset as Asset
 import Browser
-import Browser.Dom as Dom
-import Math.Vector2 exposing (vec2)
+import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3)
-import Task
-import WebGL.Game2d as Game2d exposing (Screen, TextureManager, move, rgb, textureManager)
+import WebGL.Game2d as Game2d exposing (Screen, TextureManager, move, rgb, scale, textureManager)
 import WebGL.Game2d.Render as Render exposing (Render)
 import WebGL.Game2d.TexturedShape as AutoTextures exposing (Form(..), TextureLoader(..), TexturedShape, group)
 import WebGL.Game2d.Util as Util
@@ -21,7 +19,7 @@ main =
         , update = Game2d.update view
         , subscriptions =
             \_ ->
-                Game2d.resize |> Sub.map (\screen model -> { model | screen = screen })
+                Sub.map (\screen model -> { model | screen = screen }) Game2d.resize
         }
 
 
@@ -29,28 +27,32 @@ type alias Model =
     Game2d.Model Screen {}
 
 
+init : flags -> ( Model, Cmd (Model -> Model) )
 init _ =
-    let
-        cmd =
-            Dom.getViewport
-                |> Task.map
-                    (\{ scene } model -> { model | screen = Game2d.toScreen scene.width scene.height })
-                |> Task.attempt (Result.withDefault identity)
-    in
-    { textures = textureManager
+    { textures = Game2d.textureManager
     , entities = []
     , screen = Game2d.toScreen 300 300
     }
         |> Game2d.update view identity
-        |> Tuple.mapSecond (\a -> Cmd.batch [ a, cmd ])
+        |> Tuple.mapSecond (\cmd -> Cmd.batch [ cmd, Game2d.requestScreen ])
 
 
-view : a -> List (TexturedShape String)
-view _ =
+view : Model -> List (TexturedShape String)
+view { screen } =
+    let
+        sentence =
+            "The quick brown fox jumps over the lazy dog"
+    in
     [ [ rectangle (rgb 239 41 41) 20 20 |> move 0 10
       , rectangle (rgb 114 159 207) 20 20 |> move 0 -10
       , tile 20 27 Asset.spritesheet 0
       , tilemap 16 16 Asset.tilemap Asset.lut
+      , Util.msdfFont 2 Asset.wordsConfig2 (rgb 0 0 0) (sentence ++ " (Source Code Pro)")
+            |> move screen.left (screen.top - 50)
+      , Util.msdfFont 2 Asset.wordsConfig3 (rgb 114 159 207) (sentence ++ " (Open Sans)")
+            |> move screen.left (screen.top - 100)
+      , Util.tileFont Asset.wordsConfig (rgb 114 159 207) sentence
+            |> move screen.left (screen.top - 150)
       ]
         |> group
     ]
@@ -66,12 +68,21 @@ rectangle color w h =
         |> AutoTextures.shape w h
 
 
+image : Float -> Float -> key -> TexturedShape key
+image width height =
+    AutoTextures.textured
+        (\t ->
+            Render.image t (Util.size t)
+                |> AutoTextures.shape width height
+        )
+
+
 tile : Float -> Float -> key -> Int -> TexturedShape key
 tile tileW tileH tileset index =
     tileset
         |> AutoTextures.textured
             (\t ->
-                Render.tile t (vec2 tileW tileH) (Util.size t) (toFloat index)
+                Render.tile t (vec2 tileW tileH) (Util.size t) index
                     |> AutoTextures.shape tileW tileH
             )
 

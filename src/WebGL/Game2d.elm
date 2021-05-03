@@ -6,7 +6,7 @@ module WebGL.Game2d exposing
     , Computer
     , Time, tick
     , Mouse, initMouse, mouseSubscription
-    , Screen, toScreen, resize
+    , Screen, toScreen, resize, requestScreen
     , Keyboard, initKeyboard, keyboardSubscription, toX, toY, toXY
     , Color, rgb
     )
@@ -51,7 +51,7 @@ module WebGL.Game2d exposing
 
 ## Screen
 
-@docs Screen, toScreen, resize
+@docs Screen, toScreen, resize, requestScreen
 
 
 ## Keyboard
@@ -65,6 +65,7 @@ module WebGL.Game2d exposing
 
 -}
 
+import Browser.Dom as Dom
 import Browser.Events as E
 import Dict exposing (Dict)
 import Html exposing (Html)
@@ -135,7 +136,7 @@ type alias Message screen a =
 
 {-| Create WebGL canvas
 -}
-view : Model screen a -> Html msg
+view : { a | screen : { screen | width : Width, height : Height }, entities : List Entity } -> Html msg
 view model =
     view_
         [ H.attribute "style" "position:absolute;top:0;right:0;bottom:0;left:0;"
@@ -184,7 +185,7 @@ update viewFn msg oldModel =
 
         ( entities, TextureLoader textures ) =
             viewFn updatedModel
-                |> AutoTextures.toEntities updatedModel.screen.width updatedModel.screen.height updatedModel.textures
+                |> AutoTextures.toEntities updatedModel.screen updatedModel.textures
 
         ( loader, missing ) =
             textures.extract ()
@@ -388,20 +389,18 @@ type alias Mouse =
     { x : Float
     , y : Float
     , down : Bool
-    , click : Bool
     }
 
 
 {-| -}
 initMouse : Mouse
 initMouse =
-    Mouse 0 0 False False
+    Mouse 0 0 False
 
 
 {-| -}
 mouseSubscription : Sub (Mouse -> Mouse)
 mouseSubscription =
-    -- TODO add click handler
     Sub.batch
         [ E.onMouseDown (D.succeed (\mouse -> { mouse | down = True }))
         , E.onMouseUp (D.succeed (\mouse -> { mouse | down = False }))
@@ -450,6 +449,15 @@ toScreen width height =
 resize : Sub Screen
 resize =
     E.onResize (\w h -> toScreen (toFloat w) (toFloat h))
+
+
+{-| -}
+requestScreen : Cmd ({ b | screen : Screen } -> { b | screen : Screen })
+requestScreen =
+    Dom.getViewport
+        |> Task.map
+            (\{ scene } model -> { model | screen = toScreen scene.width scene.height })
+        |> Task.attempt (Result.withDefault identity)
 
 
 {-| Figure out what is going on with the keyboard.

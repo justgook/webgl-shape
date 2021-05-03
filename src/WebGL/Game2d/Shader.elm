@@ -1,6 +1,6 @@
 module WebGL.Game2d.Shader exposing
     ( vertNone, vertRect, vertImage, vertTriangle, vertTile, vertSprite
-    , fragFill, fragCircle, fragNgon, fragImage, fragImageColor, fragTilemap
+    , fragFill, fragCircle, fragNgon, fragImage, fragTilemap, fragGlyph, fragMSDF
     , mesh, meshTriangle
     )
 
@@ -14,7 +14,7 @@ module WebGL.Game2d.Shader exposing
 
 # Fragment Shaders
 
-@docs fragFill, fragCircle, fragNgon, fragImage, fragImageColor, fragTilemap
+@docs fragFill, fragCircle, fragNgon, fragImage, fragTilemap, fragGlyph, fragMSDF
 
 
 # Mesh
@@ -56,7 +56,7 @@ vertTriangle =
      } else if (i == 2.) {
         aP = vert2;
      }
-     gl_Position = vec4(aP * mat2(uT) + uP, z  * -1.19209304e-7, 1.0);
+     gl_Position = vec4(aP * 2.0 * mat2(uT) + uP, z  * -1.19209304e-7, 1.0);
     }
     |]
 
@@ -118,7 +118,7 @@ vertTile :
         { a | aP : Vec2 }
         { b
             | uImgSize : Vec2
-            , index : Float
+            , uI : Int
             , spriteSize : Vec2
             , uP : Vec2
             , uT : Vec4
@@ -132,15 +132,16 @@ vertTile =
             uniform vec4 uT;
             uniform vec2 uP;
             uniform float z;
-            uniform float index;
+            uniform int uI;
             uniform vec2 spriteSize;
             uniform vec2 uImgSize;
             varying vec2 uv;
             vec2 edgeFix = vec2(0.0000001, -0.0000001);
             void main () {
+                float indexF = float(uI);
                 vec2 ratio = spriteSize / uImgSize;
-                float row = (uImgSize.y / spriteSize.y - 1.0) - floor((index + 0.5) * ratio.x);
-                float column = floor(mod((index + 0.5), uImgSize.x / spriteSize.x));
+                float row = (uImgSize.y / spriteSize.y - 1.0) - floor((indexF + 0.5) * ratio.x);
+                float column = floor(mod((indexF + 0.5), uImgSize.x / spriteSize.x));
                 vec2 offset = vec2(column, row) * ratio;
                 uv = (aP * 0.5 + 0.5) * ratio + offset + edgeFix;
                 gl_Position = vec4(aP * mat2(uT) + uP, z  * -1.19209304e-7, 1.0);
@@ -192,8 +193,8 @@ fragImage =
 
 
 {-| -}
-fragImageColor : Shader a { b | color : Vec4, uImg : Texture, uImgSize : Vec2 } { uv : Vec2 }
-fragImageColor =
+fragGlyph : Shader a { b | color : Vec4, uImg : Texture, uImgSize : Vec2 } { uv : Vec2 }
+fragGlyph =
     [glsl|
         precision highp float;
         varying vec2 uv;
@@ -206,6 +207,37 @@ fragImageColor =
             if(gl_FragColor.a <= 0.025) discard;
         }
     |]
+
+
+{-| -}
+fragMSDF : Shader a { b | aa : Float, color : Vec4, uImg : Texture } { uv : Vec2 }
+fragMSDF =
+    --https://css-tricks.com/techniques-for-rendering-text-with-webgl/
+    --Generate `npm install msdf-bmfont-xml -g`
+    [glsl|
+    precision mediump float;
+
+    uniform vec4 color;
+    uniform sampler2D uImg;
+    uniform float aa;
+    varying vec2 uv;
+
+    float median(float r, float g, float b) {
+        return max(min(r, g), min(max(r, g), b));
+    }
+    void main() {
+
+        vec4 texColor = texture2D(uImg, uv);
+        float sigDist = median(texColor.r, texColor.g, texColor.b) - 0.5;
+        // float opacity = clamp(sigDist/fwidth(sigDist) + 0.5, 0.0, 1.0);
+        float opacity = clamp(sigDist * aa + 0.5, 0.0, 1.0);
+        gl_FragColor = color;
+        gl_FragColor.a *= opacity;
+
+        if (gl_FragColor.a < 0.0001) discard;
+    }
+
+|]
 
 
 {-| -}

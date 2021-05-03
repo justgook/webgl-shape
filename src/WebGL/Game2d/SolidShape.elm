@@ -1,11 +1,15 @@
-module WebGL.Game2d.SolidShape exposing (shape, group, toEntities, SolidShape, Form(..))
+module WebGL.Game2d.SolidShape exposing
+    ( toEntities
+    , shape, group, SolidShape, Form(..)
+    )
 
 {-|
 
 
 # Texture-less converter
 
-@docs shape, group, toEntities, SolidShape, Form
+@docs toEntities
+@docs shape, group, SolidShape, Form
 
 -}
 
@@ -16,7 +20,13 @@ import WebGL.Game2d.Render exposing (Height, Render, Width)
 import WebGL.Game2d.Shape as Shape exposing (GroupData, ShapeData)
 
 
-{-| -}
+{-| Create [`SolidShape`](#SolidShape) from [`Render`](WebGL-Game2d-Render#Render)
+
+    rectangle : Color -> Width -> Height -> SolidShape
+    rectangle color w h =
+        Render.rect color |> SolidShape.shape w h
+
+-}
 shape : Width -> Height -> Render -> SolidShape
 shape w h render =
     { width = w, height = h, render = render }
@@ -24,26 +34,23 @@ shape w h render =
         |> Shape.create
 
 
-{-| Put shapes together so you can [`move`](#move) and [`rotate`](#rotate)
+{-| Put shapes together so you can [`move`](WebGL-Game2d#move) and [`rotate`](WebGL-Game2d#rotate)
 them as a group. Maybe you want to put a bunch of stars in the sky:
 
-    import Playground exposing (..)
-
-    main =
-        picture
-            [ star
-                |> move 100 100
-                |> rotate 5
-            , star
-                |> move -120 40
-                |> rotate 20
-            , star
-                |> move 80 -150
-                |> rotate 32
-            , star
-                |> move -90 -30
-                |> rotate -16
-            ]
+    shapes =
+        [ star
+            |> move 100 100
+            |> rotate 5
+        , star
+            |> move -120 40
+            |> rotate 20
+        , star
+            |> move 80 -150
+            |> rotate 32
+        , star
+            |> move -90 -30
+            |> rotate -16
+        ]
 
     star =
         group
@@ -77,24 +84,32 @@ type alias SolidShape =
     Shape.Shape Form
 
 
-{-| Converts [`List Shape`](#Shape) to WebGL entities
+{-| Converts [`List SolidShape`](#SolidShape) to WebGL entities
 
-    import WebGL
-    import WebGL.Game2d.SolidShape exposing (toEntities)
-
-    rectangle =
-        ...
-
-    screen =
-        { width = 100, height = 100 }
-
+    main : Program () () a
     main =
-        toEntities [ rectangle red 30 30 ]
-            |> Webgl.toHtml [ width 100, height 100 ]
+        Browser.sandbox
+            { init = ()
+            , view = view
+            , update = \_ model -> model
+            }
+
+    view : model -> Html msg
+    view _ =
+        let
+            screen =
+                Game2d.toScreen 100 100
+        in
+        { entities =
+            [ rectangle (rgb 239 41 41) 20 20 ]
+                |> SolidShape.toEntities screen
+        , screen = screen
+        }
+            |> Game2d.view
 
 -}
-toEntities : Width -> Height -> List SolidShape -> List Entity
-toEntities width height shapes =
+toEntities : { a | width : Width, height : Height } -> List SolidShape -> List Entity
+toEntities { width, height } shapes =
     List.foldr (renderShape width height Trans.identity) [] shapes
 
 

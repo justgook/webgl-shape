@@ -1,6 +1,6 @@
 module WebGL.Game2d.Render exposing
     ( circle, image, ngon, rect, triangle
-    , tile, glyph, sprite, tilemap
+    , tile, glyph, msdf, sprite, tilemap
     , Opacity, Render, ScaleRotateSkew, Translate, Z, Height, Width
     , defaultEntitySettings
     )
@@ -15,7 +15,7 @@ module WebGL.Game2d.Render exposing
 
 # With Textures
 
-@docs tile, glyph, sprite, tilemap
+@docs tile, glyph, msdf, sprite, tilemap
 
 
 # Types
@@ -44,15 +44,16 @@ import WebGL.Texture exposing (Texture)
 {-| Render is part of `Shape` that converts `Shape` into `Entity`
 
     rect : Vec3 -> Render
-    rect color uP uT opacity =
-        WebGL.entity
+    rect color uP uT z opacity =
+        WebGL.entityWith
+            entitySettings
             Shader.vertNone
             Shader.fragFill
             Shader.mesh
-            { color = color
-            , opacity = opacity
+            { color = setAlpha color opacity
             , uP = uP
             , uT = uT
+            , z = z
             }
 
 -}
@@ -111,6 +112,15 @@ type alias Height =
 
 
 {-| Rectangle render
+
+    rectangle : Vec3 -> Float -> Float -> SolidShape
+    rectangle color w h =
+        Render.rect color
+            |> SolidShape.shape w h
+
+    shape =
+        rectangle (rgb 255 0 0) 20 40
+
 -}
 rect : Vec3 -> Render
 rect color uP uT z opacity =
@@ -126,7 +136,17 @@ rect color uP uT z opacity =
         }
 
 
-{-| Render triangle
+{-| Render triangle with free defined vertexes
+
+    triangle : Vec3 -> ( Vec2, Vec2, Vec2 ) -> SolidShape
+    triangle color data =
+        Render.triangle color data
+            |> SolidShape.shape 1 1
+
+    shape =
+        triangle (rgb 41 239 41)
+            ( vec2 -100 0, vec2 0 100, vec2 100 0 )
+
 -}
 triangle : Vec3 -> ( Vec2, Vec2, Vec2 ) -> Render
 triangle color ( vert0, vert1, vert2 ) translate scaleRotateSkew z opacity =
@@ -147,7 +167,13 @@ triangle color ( vert0, vert1, vert2 ) translate scaleRotateSkew z opacity =
 
 {-| Render circle or ellipse
 
-Example [Playground.oval](Playground#oval):
+    circle : Vec3 -> Float -> SolidShape
+    circle color r =
+        Render.circle color
+            |> SolidShape.shape (r * 2) (r * 2)
+
+    shape =
+        circle (rgb 255 0 0) 50
 
 -}
 circle : Vec3 -> Render
@@ -165,6 +191,15 @@ circle color uP uT z opacity =
 
 
 {-| Render regular polygon
+
+    hexagon : Vec3 -> Float -> SolidShape
+    hexagon color r =
+        Render.ngon 6 color
+            |> SolidShape.shape (r * 2) (r * 2)
+
+    shape =
+        hexagon (rgb 255 0 0) 50
+
 -}
 ngon : Float -> Vec3 -> Render
 ngon n color uP uT z opacity =
@@ -181,7 +216,23 @@ ngon n color uP uT z opacity =
         }
 
 
-{-| -}
+{-| Render an image
+
+    image : Float -> Float -> key -> TexturedShape key
+    image width height =
+        AutoTextures.textured
+            (\t ->
+                t
+                    |> Texture.size
+                    |> (\( w, h ) -> Math.Vector2.vec2 (toFloat w) (toFloat h))
+                    |> Render.image t
+                    |> AutoTextures.shape width height
+            )
+
+    shape =
+        image 200 200 "image.png"
+
+-}
 image : Texture -> Vec2 -> Render
 image uImg uImgSize uP uT z opacity =
     WebGL.entityWith
@@ -211,10 +262,20 @@ Example: having a 3x3 tileset with each tile of 16x24 pixels
 
 this draws the first tile of the second row
 
-    tile 16 24 "sprites.png" 3
+    tile : Float -> Float -> key -> Int -> TexturedShape key
+    tile tileW tileH tileset index =
+        tileset
+            |> AutoTextures.textured
+                (\t ->
+                    Render.tile t (vec2 tileW tileH) (Util.size t) index
+                        |> AutoTextures.shape tileW tileH
+                )
+
+    shape =
+        tile 16 24 "sprites.png" 3
 
 -}
-tile : Texture -> Vec2 -> Vec2 -> Float -> Render
+tile : Texture -> Vec2 -> Vec2 -> Int -> Render
 tile spriteSheet spriteSize imageSize index translate scaleRotateSkew z opacity =
     WebGL.entityWith
         defaultEntitySettings
@@ -223,7 +284,7 @@ tile spriteSheet spriteSize imageSize index translate scaleRotateSkew z opacity 
         Shader.mesh
         { uP = translate
         , uT = scaleRotateSkew
-        , index = index
+        , uI = index
         , spriteSize = spriteSize
         , uImg = spriteSheet
         , uImgSize = imageSize
@@ -261,53 +322,20 @@ sprite image_ imageSize uv translate scaleRotateSkew z opacity =
 
 {-| Show tilemap from a tileset and a corresponding lookup table stored as a texture.
 
-For example, this lookup table is used to draw a T-shaped platform:
-
-    | 2 2 2 |
-    | 0 1 0 |
-    | 0 1 0 |
-
-which in turn uses this 3x3 tileset with each tile 16x24px.
-
-    | 1 2 3 |
-    | 4 5 6 |
-    | 7 8 9 |
-
-Finally, the function is used as follows:
-
-    tilemap 16 24 "sprites.png" "lookuptable.png"
-
-**Note:** tileset indexing starts from 1 when used in lookup table, since 0 is used to communicate "no tile here".
-
-
-## Why
-
-For tiny maps `tile` function is enough. However, when the game map grows in size performance issues creep in.
-The underlying issue is that for each `tile` the WebGL rendering engine uses what is called an [Entity][1].
-WebGL can handle a few thousands of such entities thus having a map with 100x100 tiles means to draw 10.000
-entities for each frame - that’s way too much for WebGL.
-
-
-## How it works
-
-To avoid performance issues the idea is to draw a single WebGL `Entity` for each `tilemap` call by pushing
-the composition of the map down the rendering pipeline.
-
-To do that we need to pass to playground both the tileset and a 2D array of tile indices. The latter will
-be used to look-up the correct tile.
-
-You can visualize the lookup table like those mini-maps you see on video games HUD. Each lookup table pixel
-represents a tile in the final tilemap, while the color _value_ of that pixel is an index telling which tile
-to pick from the tileset.
-
-All tiles are fixed size and placed into a grid, with indices increasing left to right and top to bottom. Notice
-that a fully black but transparent pixel (`0x00000000`) means "no tile here" and nothing is rendered.
-Hence, unlike `tile` function, this makes the lookup table indices to _start from 1_.
-
-More details about this rendering technique can be found in [Brandon Jones’ blog][2].
-
-[1]: https://package.elm-lang.org/packages/elm-community/webgl/latest/WebGL#Entity
-[2]: https://blog.tojicode.com/2012/07/sprite-tile-maps-on-gpu.html
+    tilemap : Float -> Float -> key -> key -> TexturedShape key
+    tilemap tileW tileH tileset lut =
+        AutoTextures.textured2
+            (\t1 t2 ->
+                let
+                    ( w2, h2 ) =
+                        Texture.size t2
+                            |> Tuple.mapBoth (toFloat >> (*) tileW) (toFloat >> (*) tileH)
+                in
+                Render.tilemap tileW tileH t1 t2
+                    |> AutoTextures.shape w2 h2
+            )
+            tileset
+            lut
 
 -}
 tilemap : Float -> Float -> Texture -> Texture -> Render
@@ -345,20 +373,46 @@ Same as [`tile`](#tile), but with color blending.
 Used to draw text (font glyph)
 
 -}
-glyph : Texture -> Vec2 -> Vec2 -> Vec3 -> Float -> Vec2 -> Vec4 -> Float -> Float -> WebGL.Entity
+glyph : Texture -> Vec2 -> Vec2 -> Vec3 -> Int -> Render
 glyph spriteSheet spriteSize imageSize color index translate scaleRotateSkew z opacity =
     WebGL.entityWith
         defaultEntitySettings
         Shader.vertTile
-        Shader.fragImageColor
+        Shader.fragGlyph
         Shader.mesh
         { uP = translate
         , uT = scaleRotateSkew
-        , index = index
+        , uI = index
         , spriteSize = spriteSize
         , uImg = spriteSheet
         , uImgSize = imageSize
         , uA = opacity
+        , color = setAlpha color opacity
+        , z = z
+        }
+
+
+{-| This is a utility for generating signed distance fields from vector shapes and font glyphs,
+which serve as a texture representation that can be used in real-time graphics to efficiently reproduce said shapes.
+Although it can also be used to generate conventional signed distance fields
+best known from this Valve paper and pseudo-distance fields,
+its primary purpose is to generate multi-channel distance fields, using a method I have developed.
+Unlike monochrome distance fields,
+they have the ability to reproduce sharp corners almost perfectly by utilizing all three color channels.
+-}
+msdf : Float -> Texture -> Vec2 -> Vec3 -> Vec4 -> Render
+msdf aa t imgSize color uv translate scaleRotateSkew z opacity =
+    WebGL.entityWith
+        defaultEntitySettings
+        Shader.vertSprite
+        Shader.fragMSDF
+        Shader.mesh
+        { uP = translate
+        , aa = aa
+        , uT = scaleRotateSkew
+        , uImg = t
+        , uImgSize = imgSize
+        , uUV = uv
         , color = setAlpha color opacity
         , z = z
         }

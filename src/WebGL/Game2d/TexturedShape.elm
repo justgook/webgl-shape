@@ -37,7 +37,13 @@ type TextureLoader key
         }
 
 
-{-| -}
+{-| Create [`TexturedShape`](#TexturedShape) from [`Render`](WebGL-Game2d-Render#Render)
+
+    rectangle : Color -> Width -> Height -> TexturedShape
+    rectangle color w h =
+        Render.rect color |> TexturedShape.shape w h
+
+-}
 shape : Width -> Height -> Render -> TexturedShape texture
 shape w h render =
     { width = w, height = h, render = render }
@@ -45,7 +51,8 @@ shape w h render =
         |> Shape.create
 
 
-{-| -}
+{-| Create [`TexturedShape`](#TexturedShape) that depend on `texture`.
+-}
 textured : (Texture -> TexturedShape texture) -> texture -> TexturedShape texture
 textured render src =
     { src = src, fn = render }
@@ -87,26 +94,23 @@ textured5 render src1 src2 src3 src4 src5 =
         src1
 
 
-{-| Put shapes together so you can [`move`](#move) and [`rotate`](#rotate)
+{-| Put shapes together so you can [`move`](WebGL-Game2d#move) and [`rotate`](WebGL-Game2d#rotate)
 them as a group. Maybe you want to put a bunch of stars in the sky:
 
-    import Playground exposing (..)
-
-    main =
-        picture
-            [ star
-                |> move 100 100
-                |> rotate 5
-            , star
-                |> move -120 40
-                |> rotate 20
-            , star
-                |> move 80 -150
-                |> rotate 32
-            , star
-                |> move -90 -30
-                |> rotate -16
-            ]
+    shapes =
+        [ star
+            |> move 100 100
+            |> rotate 5
+        , star
+            |> move -120 40
+            |> rotate 20
+        , star
+            |> move 80 -150
+            |> rotate 32
+        , star
+            |> move -90 -30
+            |> rotate -16
+        ]
 
     star =
         group
@@ -144,21 +148,24 @@ type alias TexturedShape key =
 {-| Converts [`List Shape`](#Shape) to WebGL entities
 
     import WebGL
-    import WebGL.Game2d.SolidShape exposing (toEntities)
+    import WebGL.Game2d.TexturedShape exposing (toEntities)
 
     rectangle =
+        ...
+
+    textures =
         ...
 
     screen =
         { width = 100, height = 100 }
 
     main =
-        toEntities [ rectangle red 30 30 ]
+        toEntities screen textures [ rectangle red 30 30 ]
             |> Webgl.toHtml [ width 100, height 100 ]
 
 -}
-toEntities : Width -> Height -> TextureLoader key -> List (TexturedShape key) -> ( List Entity, TextureLoader key )
-toEntities width height textures shapes =
+toEntities : { a | width : Width, height : Height } -> TextureLoader key -> List (TexturedShape key) -> ( List Entity, TextureLoader key )
+toEntities { width, height } textures shapes =
     List.foldr (renderShape width height Trans.identity) ( [], textures ) shapes
 
 
