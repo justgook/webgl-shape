@@ -28,6 +28,8 @@ jobs:
 
     - name: Set yarn
       id: yarn
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: "true"
       run: |
         echo "::set-output name=dir::$(yarn cache dir)"
         echo "::add-path::$(yarn bin)"
@@ -58,6 +60,8 @@ jobs:
 
     - name: Install Dependencies
       #if: steps.yarn-cache-exists.outputs.cache-hit != 'true'
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: "true"
       run: |
         yarn
         echo "::add-path::$(yarn bin)"
@@ -73,10 +77,9 @@ jobs:
         elm make src/AutoTextures.elm --output=./gh-pages/index.html
       working-directory: examples
 
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@3.2.1
+    - name: GitHub Pages action
+      uses: peaceiris/actions-gh-pages@v3.7.3
       with:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BASE_BRANCH: master
-        BRANCH: gh-pages
-        FOLDER: examples/gh-pages
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: examples/gh-pages
+
