@@ -53,9 +53,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node_modules-
 
-    - name: Test
-      run: yarn test
-
     - name: Install Dependencies
       #if: steps.yarn-cache-exists.outputs.cache-hit != 'true'
       env:
@@ -65,6 +62,8 @@ jobs:
         echo "::add-path::$(yarn bin)"
       working-directory: examples
 
+    - name: Test
+      run: yarn test
 #    - name: Optimize Javascript Jump
 #      uses: ./.github/actions/optimize-js
 #      with:
