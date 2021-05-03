@@ -1,4 +1,4 @@
-module WebGL.Game2d.Shape exposing (Shape, create, ShapeData, GroupData, TexturedData)
+module WebGL.Shape2d.Shape exposing (Shape, create, ShapeData, GroupData, TexturedData)
 
 {-|
 

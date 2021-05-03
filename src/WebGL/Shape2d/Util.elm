@@ -1,4 +1,4 @@
-module WebGL.Game2d.Util exposing
+module WebGL.Shape2d.Util exposing
     ( size
     , tileFont, msdfFont
     )
@@ -17,9 +17,9 @@ module WebGL.Game2d.Util exposing
 import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3)
 import Math.Vector4
-import WebGL.Game2d exposing (move)
-import WebGL.Game2d.Render as Render
-import WebGL.Game2d.TexturedShape as AutoTextures exposing (TexturedShape)
+import WebGL.Shape2d exposing (move)
+import WebGL.Shape2d.Render as Render
+import WebGL.Shape2d.TexturedShape as AutoTextures exposing (TexturedShape)
 import WebGL.Texture exposing (Texture)
 
 

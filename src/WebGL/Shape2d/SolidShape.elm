@@ -1,4 +1,4 @@
-module WebGL.Game2d.SolidShape exposing
+module WebGL.Shape2d.SolidShape exposing
     ( toEntities
     , shape, group, SolidShape, Form(..)
     )
@@ -14,10 +14,10 @@ module WebGL.Game2d.SolidShape exposing
 -}
 
 import WebGL exposing (Entity)
-import WebGL.Game2d.Internal exposing (applyOZ, createTrans)
-import WebGL.Game2d.Internal.Transformation as Trans exposing (Transformation)
-import WebGL.Game2d.Render exposing (Height, Render, Width)
-import WebGL.Game2d.Shape as Shape exposing (GroupData, ShapeData)
+import WebGL.Shape2d.Internal exposing (applyOZ, createTrans)
+import WebGL.Shape2d.Internal.Transformation as Trans exposing (Transformation)
+import WebGL.Shape2d.Render exposing (Height, Render, Width)
+import WebGL.Shape2d.Shape as Shape exposing (GroupData, ShapeData)
 
 
 {-| Create [`SolidShape`](#SolidShape) from [`Render`](WebGL-Game2d-Render#Render)

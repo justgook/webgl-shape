@@ -1,4 +1,4 @@
-module WebGL.Game2d.Render exposing
+module WebGL.Shape2d.Render exposing
     ( circle, image, ngon, rect, triangle
     , tile, glyph, msdf, sprite, tilemap
     , Opacity, Render, ScaleRotateSkew, Translate, Z, Height, Width
@@ -33,11 +33,11 @@ import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3)
 import Math.Vector4 exposing (Vec4)
 import WebGL exposing (Mesh, Shader)
-import WebGL.Game2d.Internal exposing (setAlpha)
-import WebGL.Game2d.Shader as Shader
 import WebGL.Settings as WebGL exposing (Setting)
 import WebGL.Settings.Blend as Blend
 import WebGL.Settings.DepthTest as DepthTest
+import WebGL.Shape2d.Internal exposing (setAlpha)
+import WebGL.Shape2d.Shader as Shader
 import WebGL.Texture exposing (Texture)
 
 

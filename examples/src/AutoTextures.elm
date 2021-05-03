@@ -4,10 +4,10 @@ import AutoTextures.Asset as Asset
 import Browser
 import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3)
-import WebGL.Game2d as Game2d exposing (Screen, TextureManager, move, rgb, scale, textureManager)
-import WebGL.Game2d.Render as Render exposing (Render)
-import WebGL.Game2d.TexturedShape as AutoTextures exposing (Form(..), TextureLoader(..), TexturedShape, group)
-import WebGL.Game2d.Util as Util
+import WebGL.Shape2d as Shape2d exposing (Screen, TextureManager, move, rgb)
+import WebGL.Shape2d.Render as Render exposing (Render)
+import WebGL.Shape2d.TexturedShape as AutoTextures exposing (Form(..), TextureLoader(..), TexturedShape, group)
+import WebGL.Shape2d.Util as Util
 import WebGL.Texture as Texture exposing (Texture)
 
 
@@ -15,26 +15,26 @@ main : Program () Model (Model -> Model)
 main =
     Browser.element
         { init = init
-        , view = Game2d.view
-        , update = Game2d.update view
+        , view = Shape2d.view
+        , update = Shape2d.update view
         , subscriptions =
             \_ ->
-                Sub.map (\screen model -> { model | screen = screen }) Game2d.resize
+                Sub.map (\screen model -> { model | screen = screen }) Shape2d.resize
         }
 
 
 type alias Model =
-    Game2d.Model Screen {}
+    Shape2d.Model Screen {}
 
 
 init : flags -> ( Model, Cmd (Model -> Model) )
 init _ =
-    { textures = Game2d.textureManager
+    { textures = Shape2d.textureManager
     , entities = []
-    , screen = Game2d.toScreen 300 300
+    , screen = Shape2d.toScreen 300 300
     }
-        |> Game2d.update view identity
-        |> Tuple.mapSecond (\cmd -> Cmd.batch [ cmd, Game2d.requestScreen ])
+        |> Shape2d.update view identity
+        |> Tuple.mapSecond (\cmd -> Cmd.batch [ cmd, Shape2d.requestScreen ])
 
 
 view : Model -> List (TexturedShape String)

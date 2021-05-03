@@ -1,4 +1,4 @@
-module WebGL.Game2d.Shader exposing
+module WebGL.Shape2d.Shader exposing
     ( vertNone, vertRect, vertImage, vertTriangle, vertTile, vertSprite
     , fragFill, fragCircle, fragNgon, fragImage, fragTilemap, fragGlyph, fragMSDF
     , mesh, meshTriangle

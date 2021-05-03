@@ -4,9 +4,9 @@ import Browser
 import Html exposing (Html)
 import Math.Vector2 exposing (Vec2, vec2)
 import Math.Vector3 exposing (Vec3)
-import WebGL.Game2d as Game2d exposing (move, rgb)
-import WebGL.Game2d.Render as Render exposing (Render)
-import WebGL.Game2d.SolidShape as SolidShape exposing (Form(..), SolidShape, group)
+import WebGL.Shape2d as Shape2d exposing (move, rgb)
+import WebGL.Shape2d.Render as Render exposing (Render)
+import WebGL.Shape2d.SolidShape as SolidShape exposing (Form(..), SolidShape, group)
 
 
 main : Program () () a
@@ -22,7 +22,7 @@ view : model -> Html msg
 view _ =
     let
         screen =
-            Game2d.toScreen 800 800
+            Shape2d.toScreen 800 800
     in
     { entities =
         [ rectangle (rgb 239 41 41) 20 20 |> move 0 -50
@@ -35,7 +35,7 @@ view _ =
             |> SolidShape.toEntities screen
     , screen = screen
     }
-        |> Game2d.view
+        |> Shape2d.view
 
 
 rectangle : Vec3 -> Float -> Float -> SolidShape

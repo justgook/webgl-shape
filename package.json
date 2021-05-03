@@ -1,10 +1,14 @@
 {
-  "name": "webgl-game2d",
+  "name": "webgl-shape",
   "version": "1.0.0",
-  "repository": "git@github.com:justgook/elm-game2d.git",
+  "repository": "git@github.com:justgook/webgl-shape.git",
   "author": "Romāns Potašovs <justgook@gmail.com>",
   "license": "BSD-3-Clause",
+  "private": true,
   "dependencies": {
     "elm-test": "0.19.1-revision2"
+  },
+  "scripts": {
+    "test": "elm-test"
   }
 }

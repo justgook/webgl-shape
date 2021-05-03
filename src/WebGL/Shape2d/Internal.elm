@@ -1,9 +1,9 @@
-module WebGL.Game2d.Internal exposing (applyOZ, createTrans, setAlpha)
+module WebGL.Shape2d.Internal exposing (applyOZ, createTrans, setAlpha)
 
 import Math.Vector3 exposing (Vec3)
 import Math.Vector4 exposing (Vec4)
-import WebGL.Game2d.Internal.Transformation as Trans exposing (Transformation)
-import WebGL.Game2d.Shape exposing (Shape)
+import WebGL.Shape2d.Internal.Transformation as Trans exposing (Transformation)
+import WebGL.Shape2d.Shape exposing (Shape)
 
 
 createTrans : Float -> Float -> Float -> Float -> Float -> Transformation -> Transformation

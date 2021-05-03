@@ -1,4 +1,4 @@
-module WebGL.Game2d.TexturedShape exposing
+module WebGL.Shape2d.TexturedShape exposing
     ( toEntities, shape, group, textured, textured2, textured3, textured4, textured5, TexturedShape, Form(..)
     , TextureLoader(..)
     )
@@ -20,10 +20,10 @@ Same as `ShapeSolid` but also can render shapes that needs textures
 -}
 
 import WebGL exposing (Entity)
-import WebGL.Game2d.Internal exposing (applyOZ, createTrans)
-import WebGL.Game2d.Internal.Transformation as Trans exposing (Transformation)
-import WebGL.Game2d.Render exposing (Height, Render, Width)
-import WebGL.Game2d.Shape as Shape exposing (GroupData, ShapeData, TexturedData)
+import WebGL.Shape2d.Internal exposing (applyOZ, createTrans)
+import WebGL.Shape2d.Internal.Transformation as Trans exposing (Transformation)
+import WebGL.Shape2d.Render exposing (Height, Render, Width)
+import WebGL.Shape2d.Shape as Shape exposing (GroupData, ShapeData, TexturedData)
 import WebGL.Texture as Texture exposing (Texture)
 
 

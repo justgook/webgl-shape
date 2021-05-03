@@ -1,8 +1,8 @@
-module WebGL.Game2d.Internal.Transformation exposing (Transformation, apply, identity, makeRotate, makeScale, makeTranslate, scale, toGL, create)
+module WebGL.Shape2d.Internal.Transformation exposing (Transformation, apply, identity, makeRotate, makeScale, makeTranslate, scale, transform, toGL, create)
 
 {-| 2d Transformation 2x3
 
-@docs Transformation, apply, identity, makeRotate, makeScale, makeTranslate, scale, toGL, create
+@docs Transformation, apply, identity, makeRotate, makeScale, makeTranslate, scale, transform, toGL, create
 
 -}
 
@@ -55,6 +55,18 @@ apply a b =
 -}
 create : Float -> Float -> Float -> Float -> Float -> Transformation
 create tx ty sx sy angle =
+    { a11 = cos angle * sx
+    , a12 = sin angle * -sy
+    , a13 = tx
+    , a21 = sin angle * sx
+    , a22 = cos angle * sy
+    , a23 = ty
+    }
+
+
+{-| -}
+transform : Float -> Float -> Float -> Float -> Float -> Transformation
+transform tx ty sx sy angle =
     { a11 = cos angle * sx
     , a12 = sin angle * -sy
     , a13 = tx

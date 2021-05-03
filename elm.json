@@ -1,17 +1,17 @@
 {
   "type": "package",
-  "name": "justgook/webgl-game2d",
+  "name": "justgook/webgl-shape",
   "summary": "2D wrapper for WebGL entities",
   "license": "BSD-3-Clause",
-  "version": "1.0.0",
+  "version": "2.0.2",
   "exposed-modules": [
-    "WebGL.Game2d",
-    "WebGL.Game2d.Render",
-    "WebGL.Game2d.Shader",
-    "WebGL.Game2d.Shape",
-    "WebGL.Game2d.SolidShape",
-    "WebGL.Game2d.TexturedShape",
-    "WebGL.Game2d.Util"
+    "WebGL.Shape2d",
+    "WebGL.Shape2d.Render",
+    "WebGL.Shape2d.Shader",
+    "WebGL.Shape2d.Shape",
+    "WebGL.Shape2d.SolidShape",
+    "WebGL.Shape2d.TexturedShape",
+    "WebGL.Shape2d.Util"
   ],
   "elm-version": "0.19.0 <= v < 0.20.0",
   "dependencies": {

@@ -6,7 +6,7 @@ import Mat3 as Mat3
 import Math.Vector2 as Vec2
 import Math.Vector4 as Vec4
 import Test exposing (..)
-import WebGL.Shape2d.Transformation as Transformation
+import WebGL.Shape2d.Internal.Transformation as Transformation
 
 
 suite : Test
