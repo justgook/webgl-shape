@@ -16,7 +16,10 @@ jobs:
         persist-credentials: false
 
     - name: Setup Elm
-      uses: justgook/setup-elm@v1
+      uses: justgook/setup-elm@1.2.0
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: "true"
+
 
     - name: Setup Node.js for use with actions
       uses: actions/setup-node@v1.1.0
@@ -47,9 +50,6 @@ jobs:
         key: ${{ runner.os }}-node_modules-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-node_modules-
-
-    - name: Install elm-test
-      run: yarn add elm-test
 
     - name: Test
       env:
