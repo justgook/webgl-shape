@@ -36,11 +36,11 @@ Read on to see examples of [`circle`](#circle), [`rectangle`](#rectangle),
 type alias Shape a =
     { x : Float
     , y : Float
-    , z : Float -- Z - index
+    , z : Float -- Z-index
     , a : Float -- Angle
     , sx : Float
     , sy : Float
-    , o : Float
+    , o : Float -- Opacity
     , data : a
     }
 
